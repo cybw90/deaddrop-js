@@ -1,8 +1,19 @@
 import readline from "readline";
-
 import { noUsers, setUserPassHash, userExists } from "./db";
 import { authenticate, getPassword } from "./session";
-
+const winston = require('winston');
+// created logger and dynamically assigning custom files name to log errors
+const logger = winston.createLogger({
+    transports: [
+        //
+        // - Write all logs with importance level of `error` or less to `error.log`
+        // - Write all logs with importance level of `info` or less to `info.log`
+        //
+        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'info.log' }),
+    ],
+});
+//logger end...
 export const newUser = async (user: string) => {
     try {
         if (!noUsers() && !userExists(user)) {
@@ -16,9 +27,12 @@ export const newUser = async (user: string) => {
         let newUser = await getNewUsername();
         let newPassHash = await getPassword();
 
-        await setUserPassHash(newUser, newPassHash);
+       if( await setUserPassHash(newUser, newPassHash)) {
+           logger.info("Creating a new user successfully.");
+       }
 
     } catch (error) {
+        logger.error("Error ocurred creating a new user.", error);
         console.error("Error ocurred creating a new user.", error);
     }
 }

@@ -7,8 +7,9 @@ export const userExists = async (user: string): Promise<boolean> => {
     const result = await db.get(query, {
         ':user': user,
     });
+    if(result) return typeof result.id === "number";
+    else  return Promise.resolve(false);
 
-    return typeof result.id === "number";
 }
 
 export const getUserId = async (user: string): Promise<number> => {
@@ -21,7 +22,8 @@ export const getUserId = async (user: string): Promise<number> => {
         ":user": user,
     });
 
-    return result;
+    if(result) return result;
+    else  return Promise.resolve(0);
 }
 
 export const getUserPassHash = async (user: string): Promise<string> => {
@@ -34,7 +36,8 @@ export const getUserPassHash = async (user: string): Promise<string> => {
         ":user": user,
     });
 
-    return result.hash;
+    if(result) return result.hash;
+    else  return Promise.resolve("");
 }
 
 export const setUserPassHash = async (user: string, hash: string) => {
@@ -49,6 +52,8 @@ export const setUserPassHash = async (user: string, hash: string) => {
         ":user": user,
         ":hash": hash,
     });
+
+    return Promise.resolve(true);
 }
 
 export const noUsers = async (): Promise<boolean> => {
