@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { getUserPassHash, noUsers } from "./db";
 
 export const getPassword = async (): Promise<string> => {
-    return readPassIn("Enter Password: ")
+    return readPassIn("Enter Password: ",{ hidden: true })
         .then((pass) => saltAndHash(pass));
 };
 

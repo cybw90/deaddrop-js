@@ -48,7 +48,7 @@ export const getMessagesForUser = async (user: string) => {
         const isMacValid = await verifyMac(messageText, sender, user, mac);
         if (!isMacValid) {
             console.log(`Error: Message from ${sender} to ${user} has been modified`);
-            logger.info(`Error: Message from ${sender} to ${user} has been modified`);
+            logger.error(`Error: Message from ${sender} to ${user} has been modified`);
             return null;
         }
         return { sender, message: messageText };

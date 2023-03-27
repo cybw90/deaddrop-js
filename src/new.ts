@@ -29,7 +29,7 @@ export const newUser = async (user: string) => {
         let newPassHash = await getPassword();
 
        if( await setUserPassHash(newUser, newPassHash)) {
-           logger.error("Creating a new user successfully.");
+           logger.info("Creating a new user successfully.");
        }
 
     } catch (error) {
