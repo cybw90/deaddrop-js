@@ -1,7 +1,7 @@
 import { getMessagesForUser, userExists } from "./db";
 import { authenticate } from "./session";
 const winston = require('winston');
-// created logger and dynamically assigning custom files name to log errors
+
 const logger = winston.createLogger({
     transports: [
         //
@@ -12,7 +12,7 @@ const logger = winston.createLogger({
         new winston.transports.File({ filename: 'info.log' }),
     ],
 });
-// logger end 
+
 export async function readMessages(user: string) {
     try {
         if (!await userExists(user)) {

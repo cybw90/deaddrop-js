@@ -1,7 +1,8 @@
 import readline from "readline";
 import { saveMessage, userExists } from "./db";
+import {authenticate} from "./session";
 const winston = require('winston');
-// created logger and dynamically assigning custom files name to log errors
+
 const logger = winston.createLogger({
     transports: [
         //
@@ -12,15 +13,22 @@ const logger = winston.createLogger({
         new winston.transports.File({ filename: 'info.log' }),
     ],
 });
-//logger end...
-export const sendMessage = async (user: string) => {
+export const sendMessage = async (sender: string, recipient: string ) => {
     try {
-        if (!await userExists(user)) {
+        if (!await userExists(sender)) {
+            throw new Error("Sender does not exist");
+        }
+
+        if (!(await authenticate(sender))) {
+            throw new Error("Unable to authenticate sender");
+        }
+
+        if (!await userExists(recipient)) {
             throw new Error("Destination user does not exist");
         }
 
         getUserMessage().then(async (message) => {
-            await saveMessage(message, user);
+            await saveMessage(message, sender, recipient);
         });
 
 

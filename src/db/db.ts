@@ -12,8 +12,10 @@ CREATE TABLE Users (
 
 CREATE TABLE Messages (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    sender INTEGER NOT NULL REFERENCES Users(id), -- Add sender column
     recipient INTEGER NOT NULL REFERENCES Users(id),
-    data TEXT NOT NULL
+    data TEXT NOT NULL,
+    mac TEXT NOT NULL -- Add MAC column
 );
 `
 

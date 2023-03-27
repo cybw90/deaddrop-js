@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { getUserPassHash, noUsers } from "./db";
 
 export const getPassword = async (): Promise<string> => {
-    return readPassIn("Password: ")
+    return readPassIn("Enter Password: ")
         .then((pass) => saltAndHash(pass));
 };
 
@@ -19,7 +19,7 @@ export const authenticate = async (user: string): Promise<boolean> => {
         return Promise.resolve(true);
     }
 
-    let pass = await readPassIn("Password: ")
+    let pass = await readPassIn("Enter Password: ", { hidden: true })
     let hash = await getUserPassHash(user);
 
     return bcrypt.compare(pass.toString(), hash.toString());
@@ -27,30 +27,36 @@ export const authenticate = async (user: string): Promise<boolean> => {
 
 // from the impressive @sdgfsdh at https://stackoverflow.com/questions/24037545/how-to-hide-password-in-the-nodejs-console
 // get a password from the cli replacing input with **** to hide it
-const readPassIn = (query: string): Promise<string> => {
-    return new Promise((resolve, _) => {
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-        });
-        const stdin = process.openStdin();
-        process.stdin.on("data", (char) => {
-            let str: string = char + "";
-            switch (str) {
-                case "\n":
-                case "\r":
-                case "\u0004":
-                    stdin.pause();
-                    break;
-                default:
-                    readline.clearLine(process.stdout, 0);
-                    readline.cursorTo(process.stdout, 0);
-                    process.stdout.write(query + Array(rl.line.length + 1).join("*"));
-                    break;
-            }
-        });
+export const readPassIn = (query: string, options: { hidden?: boolean } = {}) =>
+    new Promise<string>((resolve, reject) => {
+        const input = process.stdin;
+        const output = process.stdout;
+
+        type Rl = readline.Interface & { history: string[] };
+        const rl = readline.createInterface({ input, output }) as Rl;
+
+        if (options.hidden) {
+            const onDataHandler = (charBuff: Buffer) => {
+                const char = charBuff + '';
+                switch (char) {
+                    case '\n':
+                    case '\r':
+                    case '\u0004':
+                        input.removeListener('data', onDataHandler);
+                        break;
+                    default:
+                        readline.clearLine(process.stdout, 0);
+                        readline.cursorTo(process.stdout, 0);
+                        process.stdout.write(query + Array(rl.line.length + 1).join("*"));
+                        break;
+                }
+            };
+            input.on('data', onDataHandler);
+        }
+
         rl.question(query, (value) => {
+            if (options.hidden) rl.history = rl.history.slice(1);
+            rl.close();
             resolve(value);
         });
     });
-}
